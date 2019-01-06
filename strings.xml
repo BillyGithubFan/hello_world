@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">My First App</string>
+    <string name="edit_message">輸入短訊</string>
+    <string name="button_send">送出</string>
+</resources>
