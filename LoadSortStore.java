@@ -1,14 +1,21 @@
 package com.main.app;
 
-import java.util.ArrayList;
+import java.util.*;
+
 
 import com.jcs.test.*;
 import com.mysql.*;
 
 public class LoadSortStore {
      
-	  public static void main(String[] args) throws Exception {
+	  // public static void main(String[] args) throws Exception {
 		  
+		//public ArrayList<HaspMap<String,ArrayList<Integer>>> LoadKeywords () {
+	
+		public static HashMap<String, ArrayList<Integer> > [ ] LoadKeywords () throws Exception {	
+  
+		HashMap<String, ArrayList<Integer>>[] keywordMaps = new HashMap[2] ;
+			 
 		DocObj oneDocObj = new DocObj();
 		
 	       // Load the control info of docs from database
@@ -16,21 +23,98 @@ public class LoadSortStore {
 		maindb.connectToDB();
 				
 		
-	       // It is a total table read. The data will be used to populate caches.
-		ArrayList<DocObj> DocObjs = maindb.readdocregister();
-		    			      
+        // It is a total table read. The data will be used to populate caches.
 
-	       // Sort out one cache with doc_id, keyword, weight
-		for (int i=0; i<DocObjs.size(); i++) 
-		{
-			oneDocObj = DocObjs.get(i);
-			int doc_id = oneDocObj.getdoc_id();
-			String[] storagekeywords = oneDocObj.getstoragepath().split("\\\\");
-			String[] displaykeywords = oneDocObj.getdisplaypath().split("\\\\");
-			String[] contentkeywords = oneDocObj.getattachedkeywords().split("\\|");
-			
-			
-		}
+        ArrayList<DocObj> DocObjs = maindb.readdocregister();
+
+       
+
+        HashMap<String, ArrayList<Integer> > categoryDoc_idHash = new HashMap<>();
+
+        HashMap<String, ArrayList<Integer> > contentDoc_idHash = new HashMap<>();        
+
+ 
+
+        // Sort out one cache with doc_id, keyword, weight
+
+        for (int i=0; i<DocObjs.size(); i++) {
+
+               oneDocObj = DocObjs.get(i);
+
+               int doc_id = oneDocObj.getdoc_id();
+
+               Integer current_doc_id = Integer.valueOf(doc_id);
+
+               String[] storagekeywords = oneDocObj.getstoragepath().split("\\\\");
+
+               String[] categorykeywords = oneDocObj.getdisplaypath().split("\\\\");
+
+               String[] contentkeywords = oneDocObj.getattachedkeywords().split("\\|");
+
+              
+
+               if (categorykeywords != null) {
+
+                     for (int j=0; j<categorykeywords.length; j++ ) {
+
+                            if (categoryDoc_idHash.get(categorykeywords[j]) != null) {
+
+                                   ArrayList<Integer> newArrList = categoryDoc_idHash.get(categorykeywords[j]);
+
+                                   newArrList.add(current_doc_id);
+
+                                   categoryDoc_idHash.put(categorykeywords[j], newArrList);
+
+                            } else {
+
+                            	if (!categorykeywords[j].equals("")) {
+                            		
+                                   ArrayList<Integer> newArrList = new ArrayList<Integer>(1);
+
+                                   newArrList.add(current_doc_id);
+
+                                   categoryDoc_idHash.put(categorykeywords[j], newArrList);
+                            	}
+                            }
+
+                     }
+
+               }
+
+
+               if (contentkeywords != null) {
+
+                     for (int j=0; j<contentkeywords.length; j++ ) {
+
+                            if (contentDoc_idHash.get(contentkeywords[j]) != null) {
+
+                                   ArrayList<Integer> newArrList = contentDoc_idHash.get(contentkeywords[j]);
+
+                                   newArrList.add(current_doc_id);
+
+                                   contentDoc_idHash.put(contentkeywords[j], newArrList);
+
+                            } else {
+
+                            	if (!contentkeywords[j].equals("")) {
+                            		
+                                   ArrayList<Integer> newArrList = new ArrayList<Integer>(1);
+
+                                   newArrList.add(current_doc_id);
+
+                                   contentDoc_idHash.put(contentkeywords[j], newArrList);
+                            	}
+                            }
+
+                     }
+
+               }
+
+                            
+
+        }
+
+
 
 	      
 
@@ -65,7 +149,21 @@ public class LoadSortStore {
 	       // the local db to see if the doc has been downloaded before. If no local copy, 
 
 	       // send request to website to load this doc.
-		
+
+        keywordMaps[0] = categoryDoc_idHash;
+        keywordMaps[1] = contentDoc_idHash;
+        
+        System.out.println("keywordMaps loaded fine, in LoadSortStore class.");
+        
+        return  keywordMaps;
+        
 	  }
 
+		public static void main(String[] args) throws Exception {
+			HashMap<String, ArrayList<Integer>>[] keywordMaps = null;
+			keywordMaps = LoadKeywords(); 
+			System.out.print(keywordMaps);
+			return ;
+		}
+		
 }
